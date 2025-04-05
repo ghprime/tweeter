@@ -12,10 +12,9 @@ import Login from "./components/authentication/login/Login";
 import Register from "./components/authentication/register/Register";
 import MainLayout from "./components/mainLayout/MainLayout";
 import Toaster from "./components/toaster/Toaster";
-import FeedScroller from "./components/mainLayout/FeedScroller";
-import StoryScroller from "./components/mainLayout/StoryScroller";
-import { AuthToken, User, FakeData } from "tweeter-shared";
+import { AuthToken, User, FakeData, Status } from "tweeter-shared";
 import UserItemScroller from "./components/mainLayout/UserItemScroller";
+import StatusScroller from "./components/mainLayout/StatusScroller";
 
 const App = () => {
   const { currentUser, authToken } = useContext(UserInfoContext);
@@ -59,19 +58,57 @@ const AuthenticatedRoutes = () => {
     return FakeData.instance.getPageOfUsers(lastItem, pageSize, userAlias);
   };
 
+  const loadMoreFeedItems = async (
+    _authToken: AuthToken,
+    _userAlias: string,
+    pageSize: number,
+    lastItem: Status | null
+  ): Promise<[Status[], boolean]> => {
+    // TODO: Replace with the result of calling server
+    return FakeData.instance.getPageOfStatuses(lastItem, pageSize);
+  };
+
+  const loadMoreStoryItems = async (
+    _authToken: AuthToken,
+    _userAlias: string,
+    pageSize: number,
+    lastItem: Status | null
+  ): Promise<[Status[], boolean]> => {
+    // TODO: Replace with the result of calling server
+    return FakeData.instance.getPageOfStatuses(lastItem, pageSize);
+  };
+
   return (
     <Routes>
       <Route element={<MainLayout />}>
         <Route index element={<Navigate to="/feed" />} />
-        <Route path="feed" element={<FeedScroller />} />
-        <Route path="story" element={<StoryScroller />} />
+        <Route
+          path="feed"
+          element={
+            <StatusScroller
+              loadMoreStatusItems={loadMoreFeedItems}
+              type="feed"
+              key="feed"
+            />
+          }
+        />
+        <Route
+          path="story"
+          element={
+            <StatusScroller
+              loadMoreStatusItems={loadMoreStoryItems}
+              type="story"
+              key="story"
+            />
+          }
+        />
         <Route
           path="followees"
           element={
             <UserItemScroller
               key={1}
               loadItems={loadMoreFollowees}
-                itemDescription="followees"
+              itemDescription="followees"
             />
           }
         />
@@ -79,9 +116,9 @@ const AuthenticatedRoutes = () => {
           path="followers"
           element={
             <UserItemScroller
-              key={2} 
+              key={2}
               loadItems={loadMoreFollowers}
-                itemDescription="followers"
+              itemDescription="followers"
             />
           }
         />
